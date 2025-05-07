@@ -1,0 +1,49 @@
+---
+- name: Install Kubernetes
+  hosts: k8s
+  remote_user: root
+
+  tasks:
+    # TODO community.general.dnf_config_manager doesn't seem to support adding repos yet...
+  - name: Add docker repo
+    ansible.builtin.shell:
+      cmd: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+    # TODO I don't think ansible.builtin.dnf doesn't do that either?
+  - name: Clean DNF Cache
+    ansible.builtin.shell:
+      cmd: dnf makecache
+
+
+  - name: Install containerd.io
+    become: true
+    ansible.builtin.dnf:
+      name: containerd.io
+      state: present
+
+  - name: Place the containerd config
+    ansible.builtin.copy:
+      src: files/containerd_config.toml
+      dest: /etc/containerd/config.toml
+
+  - name: Enable the containerd service
+    ansible.builtin.systemd_service:
+      name: containerd
+      state: started
+      enabled: true
+
+  - name: Place the modules for K8s
+    become: true
+    ansible.builtin.copy:
+      src: files/modules_k8s.conf
+      dest: /etc/modules-load.d/k8s.conf
+
+  - name: Load the overlay module
+    community.general.modprobe:
+      name: overlay
+      state: present
+
+  - name: Load the br_netfilter module
+    community.general.modprobe:
+      name: br_netfilter
+      state: present
