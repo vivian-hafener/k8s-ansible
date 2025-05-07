@@ -1,1 +1,2 @@
-localhost ansible_connection=local ansible_python_interpreter="/usr/bin/python"
+[hetzner]
+rocky-4gb-hil-1 ansible_host=5.78.137.57 ansible_user=vhafener ansible_port=22 ansible_ssh_private_key_file=/home/june/.ssh/id_ed25519
