@@ -1,0 +1,9 @@
+#!/bin/bash
+
+kubeadm init \
+	--apiserver-advertise-address={{ apiserver_advertise_address }} \
+	--apiserver-cert-extra-sans="$(curl -sSL ifconfig.me),k8s.csh.rit.edu" \
+	--kubernetes-version={{ k8s_version }} \
+	--pod-network-cidr={{ pod_network_cidr }} \
+	--control-plane-endpoint={{ control_plane_endpoint }} \
+	--upload-certs

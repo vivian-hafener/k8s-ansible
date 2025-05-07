@@ -4,6 +4,12 @@
   remote_user: root
 
   tasks:
+  - name: Install basic packages
+    ansible.builtin.dnf:
+      name: "{{ item }}"
+      state: present
+    loop: "{{ init_packages }}"
+
     # TODO community.general.dnf_config_manager doesn't seem to support adding repos yet...
   - name: Add docker repo
     ansible.builtin.shell:
@@ -13,7 +19,6 @@
   - name: Clean DNF Cache
     ansible.builtin.shell:
       cmd: dnf makecache
-
 
   - name: Install containerd.io
     become: true
@@ -47,3 +52,46 @@
     community.general.modprobe:
       name: br_netfilter
       state: present
+
+  - name: Open certain ports for k8s
+    ansible.posix.firewalld:
+      port: "{{ item }}"
+      state: enabled
+      permanent: true
+    loop: "{{ openports }}"
+
+  - name: Reload firewalld.service
+    ansible.builtin.systemd_service:
+      name: firewalld 
+      state: reloaded
+
+  - name: Disable swap
+    command: swapoff -a
+    become: true
+
+  - name: Place the k8s repo
+    ansible.builtin.copy:
+      src: files/k8s.repo
+      dest: /etc/yum.repos.d/k8s.repo
+
+    # TODO I don't think ansible.builtin.dnf doesn't do that either?
+  - name: Clean DNF Cache
+    ansible.builtin.shell:
+      cmd: dnf makecache
+      
+  - name: Install k8s packages
+    ansible.builtin.dnf:
+      name: "{{ item }}"
+      state: present
+      disable_excludes: kubernetes
+    loop: "{{ k8s_packages }}"
+
+  - name: Enable kubelet
+    ansible.builtin.systemd_service:
+      name: kubelet
+      enabled: yes
+
+  - name: Place kubeadm init script
+    ansible.builtin.template:
+      src: templates/kubeadm_init.j2
+      dest: /sbin/kubeadm_init.sh

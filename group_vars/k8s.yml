@@ -1,0 +1,26 @@
+---
+openports:
+  - 6443/tcp
+  - 2379-2380/tcp
+  - 10250-10251/tcp
+  - 10259/tcp
+  - 10257/tcp
+  - 179/tcp
+  - 4789/udp
+
+init_packages:
+  - firewalld
+  - vim
+  - tmux
+
+k8s_packages:
+  - kubelet
+  - kubeadm
+  - kubectl
+
+# Configuration for kubeadm init
+apiserver_advertise_address: 0.0.0.0
+apiserver_cert_extra_sans: "$(curl -sSL ifconfig.me),k8s.csh.rit.edu"
+k8s_version: 1.33.0
+pod_network_cidr: 10.244.0.0/16 
+control_plane_endpoint: k8s.vhafener.com:6443
