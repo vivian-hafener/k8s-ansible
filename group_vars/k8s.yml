@@ -12,6 +12,7 @@ init_packages:
   - firewalld
   - vim
   - tmux
+  - fail2ban
 
 k8s_packages:
   - kubelet

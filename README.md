@@ -1,2 +1,3 @@
 # k8s-ansible
-Practice using ansible to deploy a simple single-node K8s cluster
+
+A little tool to get practice using ansible and configuring k8s

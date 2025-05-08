@@ -4,11 +4,18 @@
   remote_user: root
 
   tasks:
+    # Initialize the system
   - name: Install basic packages
     ansible.builtin.dnf:
       name: "{{ item }}"
       state: present
     loop: "{{ init_packages }}"
+
+  - name: enable fail2ban
+    ansible.builtin.systemd_service:
+      name: fail2ban
+      state: started
+      enabled: true
 
     # TODO community.general.dnf_config_manager doesn't seem to support adding repos yet...
   - name: Add docker repo
